@@ -34,7 +34,7 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 		return (x<0)?-x:x;
 	}
 	
-	int[] RGBtoHSV(short R, short G, short B) {
+	static int[] RGBtoHSV(short R, short G, short B) {
 		double Rc,Gc,Bc;
 		Rc = R/255.0;Gc = G/255.0;Bc = B/255.0;
 		double Cmax, Cmin;
@@ -74,7 +74,7 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 		return result;
 	}
 	
-	short[] HSVtoRGB(int H, int S, int V) {
+	static short[] HSVtoRGB(int H, int S, int V) {
 		double Sd, Vd;
 		Sd = S/255.0; Vd = V/255.0;
 		double C = Sd*Vd;
@@ -126,6 +126,60 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 		hsvVal = new int[width][height][3];   //[x][y][0:hue, 1:saturation, 2:value]
 		for(int i=0;i<width;i++) {
 			for(int j=0;j<height;j++) {
+				hsvVal[i][j] = RGBtoHSV(origPixelVal[i][j][0],origPixelVal[i][j][1],origPixelVal[i][j][2]);
+			}
+		}
+	}
+	
+	void getRGBImgFromHSV() {
+		short[][][] rgbVals = new short[width][height][3];
+		for(int i=0;i<width;i++) {
+			for(int j=0;j<height;j++) {
+				rgbVals[i][j] = HSVtoRGB(hsvVal[i][j][0],hsvVal[i][j][1],hsvVal[i][j][2]);
+			}
+		}
+	}
+}
+
+class HSVHillClimber{
+	int HueN;
+	int SatN;
+	int ValN;
+	int[][][] hist;
+	int width, height;
+	public HSVHillClimber(int[][][] HSVVal, int width, int height, int HueN, int SatN, int ValN) {
+		this.HueN = HueN;
+		this.SatN = SatN;
+		this.ValN = ValN;
+		this.width = width;
+		this.height = height;
+		
+		hist = new int[HueN][SatN][ValN];
+		makeHist(HSVVal, width, height);
+	}
+	void makeHist(int[][][] HSVVal) {
+		for(int i=0;i<width;i++) {
+			for(int j=0;j<height;j++) {
+				int H,S,V;
+				H = HSVVal[i][j][0];
+				S = HSVVal[i][j][1];
+				V = HSVVal[i][j][2];
+				
+				int HBucket, SBucket, VBucket;
+				HBucket = H/(360/HueN);
+				SBucket = S/(100/SatN);
+				VBucket = V/(100/ValN);
+				
+				hist[HBucket][SBucket][VBucket]++;
+			}
+		}
+	}
+	public int[][][] makeHSVFromHist() {
+		int[][][] resultHSV = new int[width][height][3];
+		for(int i=0;i<width;i++) {
+			for(int j=0;j<height;j++) {
+				int H,S,V;
+				H = 
 			}
 		}
 	}
