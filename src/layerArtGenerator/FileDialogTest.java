@@ -13,8 +13,10 @@ import javax.swing.*;
 public class FileDialogTest extends JFrame implements MouseWheelListener{
 	double zoomLevel =1.0;
 	BufferedImage origImg;
+	BufferedImage segmentedImg;
 	JFrame showWindow;
 	JPanel showPanel;
+	ImageProcessingHandler ImageProcessor;
 	public FileDialogTest() {
 		this.setTitle("FileDialogTest");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -29,7 +31,9 @@ public class FileDialogTest extends JFrame implements MouseWheelListener{
 			System.out.println("You chose " + filename);
 			try {
 				origImg = ImageIO.read(new File(filename));
-				showImage(origImg);
+				ImageProcessor = new ImageProcessingHandler(origImg);
+				segmentedImg = ImageProcessor.getSegmentedImage();
+				showImage(segmentedImg);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -77,7 +81,7 @@ public class FileDialogTest extends JFrame implements MouseWheelListener{
 			}
 		}
 		System.out.println("zoomLevel:"+zoomLevel);
-		BufferedImage newImage = zoomImage(origImg, zoomLevel);
+		BufferedImage newImage = zoomImage(segmentedImg, zoomLevel);
 		changeImage(newImage);
 	}
 	public static void main(String[] args) {
