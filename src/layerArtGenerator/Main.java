@@ -10,14 +10,14 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-public class FileDialogTest extends JFrame implements MouseWheelListener{
+public class Main extends JFrame implements MouseWheelListener{
 	double zoomLevel =1.0;
 	BufferedImage origImg;
 	BufferedImage segmentedImg;
 	JFrame showWindow;
 	JPanel showPanel;
 	ImageProcessingHandler ImageProcessor;
-	public FileDialogTest() {
+	public Main() {
 		this.setTitle("FileDialogTest");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(600,400);
@@ -85,6 +85,6 @@ public class FileDialogTest extends JFrame implements MouseWheelListener{
 		changeImage(newImage);
 	}
 	public static void main(String[] args) {
-		FileDialogTest asdf = new FileDialogTest();
+		Main asdf = new Main();
 	}
 }
