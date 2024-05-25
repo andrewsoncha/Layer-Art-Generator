@@ -29,25 +29,25 @@ class WindowMouseListener implements MouseWheelListener, MouseListener, MouseMot
 		if(notches<0) { //scroll up == zoom out
 			System.out.println("Mouse weel moved Up by "+(-notches)+" notch(es)");
 			if(mainObj.zoomLevel+notches>0) {
-				mainObj.zoomLevel+=notches;
+				mainObj.zoomLevel*=1.1;
 			}
 		}
 		else { //scroll down == zoom in
 			System.out.println("Mouse weel moved Down by "+(notches)+" notch(es)");
-			if(mainObj.zoomLevel+notches<5.0) {
-				mainObj.zoomLevel+=notches;
-			}
+			//if(mainObj.zoomLevel+notches<5.0) {
+				mainObj.zoomLevel/=1.1;
+			//}
 		}
 		System.out.println("zoomLevel:"+mainObj.zoomLevel);
-		BufferedImage newImage = mainObj.zoomMoveChangeImage();
+		BufferedImage newImage = mainObj.redrawImage();
 		mainObj.changeImage(newImage);
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		if(dragged==false) {
-			dragX = e.getX();
-			dragY = e.getY();
+			dragX = e.getX()-mainObj.imageOffsetX;
+			dragY = e.getY()-mainObj.imageOffsetY;
 			dragged = true;
 		}
 		else {
@@ -57,7 +57,7 @@ class WindowMouseListener implements MouseWheelListener, MouseListener, MouseMot
 			System.out.printf("dx:%d   dy:%d\n", dx,dy);
 			mainObj.imageOffsetX = dx;
 			mainObj.imageOffsetY = dy;
-			mainObj.zoomMoveChangeImage();
+			mainObj.redrawImage();
 			dragged = true;
 		}
 	}
@@ -108,7 +108,7 @@ public class Main extends JFrame{
 	BufferedImage currentImg;
 	JFrame showWindow;
 	JPanel showPanel;
-	ImageProcessingHandler ImageProcessor;
+	ImageProcessingHandler imageProcessorObj;
 	WindowMouseListener mouseListener;
 	int imageOffsetX=0, imageOffsetY=0;
 	int mouseX, mouseY;
@@ -126,8 +126,8 @@ public class Main extends JFrame{
 			System.out.println("You chose " + filename);
 			try {
 				origImg = ImageIO.read(new File(filename));
-				ImageProcessor = new ImageProcessingHandler(origImg);
-				segmentedImg = ImageProcessor.getSegmentedImage();
+				imageProcessorObj = new ImageProcessingHandler(origImg);
+				segmentedImg = imageProcessorObj.getSegmentedImage();
 				currentImg = segmentedImg;
 				showImage(segmentedImg);
 			} catch (IOException e) {
@@ -156,7 +156,7 @@ public class Main extends JFrame{
 		lowerPanel.add(mergeButton); lowerPanel.add(clearButton);
 		showWindow.add(lowerPanel, BorderLayout.SOUTH);
 		showWindow.setSize(new Dimension(1000,800));
-		JLabel picLabel = new JLabel(new ImageIcon(zoomMoveChangeImage()));
+		JLabel picLabel = new JLabel(new ImageIcon(redrawImage()));
 		showPanel.add(picLabel);
 		showWindow.setVisible(true);
 	}
@@ -166,14 +166,14 @@ public class Main extends JFrame{
 		showPanel.add(newLabel);
 		showPanel.updateUI();
 	}
-	BufferedImage zoomMoveChangeImage() {
+	BufferedImage redrawImage() {
 		int newImageWidth = (int)(currentImg.getWidth() * zoomLevel);
 		int newImageHeight = (int)(currentImg.getHeight() * zoomLevel);
-		BufferedImage resizedImage = new BufferedImage(newImageWidth , newImageHeight, currentImg.getType());
+		BufferedImage resizedImage = new BufferedImage(showWindow.getWidth() , showWindow.getHeight(), currentImg.getType());
 		Graphics2D g = resizedImage.createGraphics();
 		System.out.printf("imageOffsetX:%d   imageOffsetY:%d\n", imageOffsetX,imageOffsetY);
 		//g.drawImage(currentImg, imageOffsetX, imageOffsetY, newImageWidth , newImageHeight , null);
-		g.drawImage(currentImg, imageOffsetX, imageOffsetY, showWindow.getWidth() , showWindow.getHeight() , null);
+		g.drawImage(currentImg, imageOffsetX, imageOffsetY, newImageWidth, newImageHeight , null);
 		g.dispose();
 		changeImage(resizedImage);
 		return resizedImage;
@@ -182,8 +182,10 @@ public class Main extends JFrame{
 		int imageX, imageY;
 		imageX = (windowX-imageOffsetX)*currentImg.getWidth()/showWindow.getWidth();
 		imageY = (windowY-imageOffsetY)*currentImg.getHeight()/showWindow.getHeight();
-		int chosenArea = ImageProcessor.selectArea(imageX, imageY);
+		int chosenArea = imageProcessorObj.selectArea(imageX, imageY);
 		System.out.println(chosenArea);
+		currentImg = imageProcessorObj.getUpdatedImage();
+		redrawImage();
 	}
 	public static void main(String[] args) {
 		Main asdf = new Main();

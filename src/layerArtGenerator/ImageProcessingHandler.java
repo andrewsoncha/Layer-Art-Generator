@@ -5,12 +5,12 @@ import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.Iterator;
-
 public class ImageProcessingHandler { //the functions could probably be divided better
 	int width, height;
 	BufferedImage origImg;
 	BufferedImage hsvImg;
 	short[][][] origPixelVal;
+	short[][][] segmentedImg;
 	AreaDivider dividerObj;
 	public ImageProcessingHandler(BufferedImage inputImg) { //getting RGB values from BufferedImage. Probably the slow method but I don't want to do bit manipulation
 		origImg = inputImg;
@@ -32,6 +32,12 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 	}
 	
 	int selectArea(int imageX, int imageY) {
+		if(imageX<0||imageY<0) {
+			return -1;
+		}
+		if(imageX>width||imageY>height) {
+			return -1;
+		}
 		int selectedIdx = dividerObj.selectArea(imageX, imageY);
 		return selectedIdx;
 	}
@@ -53,15 +59,19 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 		int[][][] hsvVal = getHSVImgFromRGB(origPixelVal);
 		HSVPeakFinder climberObj = new HSVPeakFinder(hsvVal, width, height, 20, 10, 10);
 		int[][][] segmentedHSVVal = climberObj.getSegmentedImage();
-		short[][][] segmentedRGB = getRGBImgFromHSV(segmentedHSVVal);
+		segmentedImg = getRGBImgFromHSV(segmentedHSVVal);
 		
 		//return makeImageFromPix(segmentedRGB, width, height);
-		return drawAreaEdges(segmentedRGB, 1);
+		dividerObj = new AreaDivider(segmentedImg, width, height);
+		dividerObj.divideAreas();
+		return drawAreaEdges(origPixelVal, 1);
 	}
 	
-	public BufferedImage drawAreaEdges(short[][][] pixelVal, int distThresh) {
-		dividerObj = new AreaDivider(pixelVal, width, height);
-		dividerObj.divideAreas();
+	public BufferedImage getUpdatedImage() {
+		return drawAreaEdges(origPixelVal, 1);
+	}
+	
+	BufferedImage drawAreaEdges(short[][][] pixelVal, int distThresh) {
 		short[][][] edgePixVal = new short[width][height][3];
 		
 		for(int i=0;i<width;i++) {
@@ -70,8 +80,8 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 			}
 		}
 		
-		for(int i=0;i<dividerObj.areaList.size();i++) {
-			Set<Pair> edge = dividerObj.areaList.get(i).getEdges(distThresh);
+		for(int i: dividerObj.areaMap.keySet()) {
+			Set<Pair> edge = dividerObj.areaMap.get(i).getEdges(distThresh);
 			//System.out.printf("i:%d   edge size:%d\n", i,edge.size());
 			
 			Iterator<Pair> it = edge.iterator();
@@ -79,6 +89,19 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 				Pair coor = it.next();
 				int x = coor.x, y=coor.y;
 				edgePixVal[x][y][0]=0;edgePixVal[x][y][1]=0;edgePixVal[x][y][2]=0;
+			}
+		}
+		
+		Set<Integer> selectedAreaIdx = dividerObj.selectedAreaIndex;   //highlight the edges of selected areas as white
+		for(int i: selectedAreaIdx) {
+			Set<Pair> edge = dividerObj.areaMap.get(i).getEdges(distThresh);
+			//System.out.printf("i:%d   edge size:%d\n", i,edge.size());
+			
+			Iterator<Pair> it = edge.iterator();
+			while(it.hasNext()) {
+				Pair coor = it.next();
+				int x = coor.x, y=coor.y;
+				edgePixVal[x][y][0]=255;edgePixVal[x][y][1]=255;edgePixVal[x][y][2]=255;
 			}
 		}
 		

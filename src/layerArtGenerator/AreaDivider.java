@@ -1,6 +1,7 @@
 package layerArtGenerator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -47,21 +48,25 @@ class Area{
 		}
 		return edgeCoor;
 	}
+	void merge(Area otherArea) {
+		Set<Pair> otherCoors = otherArea.pixCoor;
+		pixCoor.addAll(otherCoors);
+	}
 }
 
 public class AreaDivider {
 	short[][][] pixVals;
 	int width, height;
-	ArrayList<Area> areaList;
+	HashMap<Integer, Area> areaMap;
 	int[][] areaIdx; //index of the area in ArrayList<Area> areaList in which the pixel belongs to.
-	Set<Area> selectedAreas;
+	Set<Integer> selectedAreaIndex;
 	
 	public AreaDivider(short[][][] pixVals, int width, int height) {
 		this.pixVals = pixVals;
 		this.width = width;
 		this.height = height;
-		areaList = new ArrayList<Area>();
-		selectedAreas = new HashSet<Area>();
+		areaMap = new HashMap<Integer, Area>();
+		selectedAreaIndex = new HashSet<Integer>();
 	}
 	Area bfs(boolean[][] visit, int startingX, int startingY, int currentAreaIdx) {
 		short[] color = pixVals[startingX][startingY];
@@ -105,24 +110,41 @@ public class AreaDivider {
 	}
 	void divideAreas() {
 		boolean[][] visit = new boolean[width][height];
-		areaList = new ArrayList<Area>();
 		areaIdx = new int[width][height];
+		int cnt=0;
 		for(int i=0;i<width;i++) {
 			for(int j=0;j<height;j++) {
 				Pair current = new Pair(i,j);
 				if(visit[current.x][current.y]==false) {
-					areaList.add(bfs(visit, i,j, areaList.size()));
+					areaMap.put(cnt, bfs(visit, i,j, cnt));
+					cnt++;
 				}
 			}
 		}
 	}
 	int selectArea(int imageX, int imageY) {
-		if(imageX<0||imageY<0) {
-			return 0;
-		}
 		int selectedIdx = areaIdx[imageX][imageY];
-		Area selectedArea = areaList.get(selectedIdx);
-		selectedAreas.add(selectedArea);
+		selectedAreaIndex.add(selectedIdx);
 		return selectedIdx;
+	}
+	
+	void mergeSelectedAreas() {
+		int maxCnt=0;
+		Area biggestArea = null;
+		int biggestAreaIdx=-1;
+		for(Integer areaIdx : selectedAreaIndex) {
+			if(maxCnt<areaMap.get(areaIdx).pixCoor.size()) {
+				maxCnt = areaMap.get(areaIdx).pixCoor.size();
+				biggestArea = areaMap.get(areaIdx);
+				biggestAreaIdx = areaIdx;
+			}
+		}
+		for(Integer areaIdx : selectedAreaIndex) {
+			if(biggestAreaIdx!=areaIdx) {
+				biggestArea.merge(areaMap.get(areaIdx));
+				areaMap.remove(areaIdx);
+			}
+		}
+		selectedAreaIndex = new HashSet<Integer>();
 	}
 }
