@@ -17,6 +17,7 @@ class WindowMouseListener implements MouseWheelListener, MouseListener, MouseMot
 	Main mainObj;
 	boolean clicked = false;
 	boolean dragged = false;
+	int dragX, dragY;
 	int clickX, clickY;
 	public WindowMouseListener(Main mainObj) {
 		this.mainObj = mainObj;
@@ -45,13 +46,21 @@ class WindowMouseListener implements MouseWheelListener, MouseListener, MouseMot
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		int dx = e.getX()-clickX;
-		int dy = e.getY()-clickY;
-		System.out.printf("dx:%d   dy:%d\n", dx,dy);
-		mainObj.imageOffsetX += dx;
-		mainObj.imageOffsetY += dy;
-		mainObj.zoomMoveChangeImage();
-		dragged = true;
+		if(dragged==false) {
+			dragX = e.getX();
+			dragY = e.getY();
+			dragged = true;
+		}
+		else {
+			int dx = e.getX()-dragX;
+			int dy = e.getY()-dragY;
+			System.out.printf("getX:%d   getY:%d\n",e.getX(), e.getY());
+			System.out.printf("dx:%d   dy:%d\n", dx,dy);
+			mainObj.imageOffsetX = dx;
+			mainObj.imageOffsetY = dy;
+			mainObj.zoomMoveChangeImage();
+			dragged = true;
+		}
 	}
 
 	@Override
@@ -81,7 +90,7 @@ class WindowMouseListener implements MouseWheelListener, MouseListener, MouseMot
 		if(dragged) {
 			
 		}
-		
+		dragged = false;
 	}
 
 	@Override
