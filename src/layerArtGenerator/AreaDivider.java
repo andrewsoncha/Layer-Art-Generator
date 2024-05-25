@@ -54,12 +54,14 @@ public class AreaDivider {
 	int width, height;
 	ArrayList<Area> areaList;
 	int[][] areaIdx; //index of the area in ArrayList<Area> areaList in which the pixel belongs to.
+	Set<Area> selectedAreas;
 	
 	public AreaDivider(short[][][] pixVals, int width, int height) {
 		this.pixVals = pixVals;
 		this.width = width;
 		this.height = height;
 		areaList = new ArrayList<Area>();
+		selectedAreas = new HashSet<Area>();
 	}
 	Area bfs(boolean[][] visit, int startingX, int startingY, int currentAreaIdx) {
 		short[] color = pixVals[startingX][startingY];
@@ -74,6 +76,7 @@ public class AreaDivider {
 			Pair currentCoor = coorQ.remove();
 			int x = currentCoor.x,y = currentCoor.y;
 			areaIdx[x][y] = currentAreaIdx;
+			//System.out.printf("(%d,%d)  idx:%d\n", x,y,currentAreaIdx);
 
 			for(int i=-1;i<=1;i++) {
 				for(int j=-1;j<=1;j++) {
@@ -88,6 +91,9 @@ public class AreaDivider {
 							coorQ.add(neighbor);
 							visit[neighbor.x][neighbor.y]=true;
 							resultArea.addCoor(neighbor.x, neighbor.y);
+						}
+						else {
+							System.out.println("NOT!!!!!!!!!!!!!!!!!!!!!!!!!!");
 						}
 					}
 				}
@@ -109,5 +115,14 @@ public class AreaDivider {
 				}
 			}
 		}
+	}
+	int selectArea(int imageX, int imageY) {
+		if(imageX<0||imageY<0) {
+			return 0;
+		}
+		int selectedIdx = areaIdx[imageX][imageY];
+		Area selectedArea = areaList.get(selectedIdx);
+		selectedAreas.add(selectedArea);
+		return selectedIdx;
 	}
 }

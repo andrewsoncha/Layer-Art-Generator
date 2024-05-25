@@ -15,7 +15,6 @@ import javax.swing.*;
 
 class WindowMouseListener implements MouseWheelListener, MouseListener, MouseMotionListener{
 	Main mainObj;
-	boolean clicked = false;
 	boolean dragged = false;
 	int dragX, dragY;
 	int clickX, clickY;
@@ -74,8 +73,7 @@ class WindowMouseListener implements MouseWheelListener, MouseListener, MouseMot
 		clickX = e.getX();
 		clickY = e.getY();
 		System.out.printf("clickX:%d   clickY:%d\n", clickX,clickY);
-		clicked = true;
-		
+		mainObj.mouseClicked(clickX, clickY);
 	}
 
 	@Override
@@ -86,10 +84,6 @@ class WindowMouseListener implements MouseWheelListener, MouseListener, MouseMot
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		clicked = false;
-		if(dragged) {
-			
-		}
 		dragged = false;
 	}
 
@@ -144,18 +138,26 @@ public class Main extends JFrame{
 		this.setVisible(true);
 	}
 	void showImage(BufferedImage pic) {
-		JLabel picLabel = new JLabel(new ImageIcon(pic));
 		showPanel = new JPanel();
 		
-		showPanel.add(picLabel);
+		//showPanel.setSize(new Dimension(pic.getWidth(), pic.getHeight()));
 		showWindow = new JFrame();
+		showWindow.setLayout(new BorderLayout());
 		mouseListener = new WindowMouseListener(this);
 		showWindow.addMouseListener(mouseListener);
 		showWindow.addMouseMotionListener(mouseListener);
 		showWindow.addMouseWheelListener(mouseListener);
 		showWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		showWindow.setSize(new Dimension(pic.getWidth(), pic.getHeight()));
-		showWindow.add(showPanel);
+		showWindow.add(showPanel, BorderLayout.CENTER);
+		
+		JPanel lowerPanel = new JPanel();
+		JButton mergeButton = new JButton("Merge");
+		JButton clearButton = new JButton("Clear");
+		lowerPanel.add(mergeButton); lowerPanel.add(clearButton);
+		showWindow.add(lowerPanel, BorderLayout.SOUTH);
+		showWindow.setSize(new Dimension(1000,800));
+		JLabel picLabel = new JLabel(new ImageIcon(zoomMoveChangeImage()));
+		showPanel.add(picLabel);
 		showWindow.setVisible(true);
 	}
 	void changeImage(BufferedImage newImg) {
@@ -170,10 +172,18 @@ public class Main extends JFrame{
 		BufferedImage resizedImage = new BufferedImage(newImageWidth , newImageHeight, currentImg.getType());
 		Graphics2D g = resizedImage.createGraphics();
 		System.out.printf("imageOffsetX:%d   imageOffsetY:%d\n", imageOffsetX,imageOffsetY);
-		g.drawImage(currentImg, imageOffsetX, imageOffsetY, newImageWidth , newImageHeight , null);
+		//g.drawImage(currentImg, imageOffsetX, imageOffsetY, newImageWidth , newImageHeight , null);
+		g.drawImage(currentImg, imageOffsetX, imageOffsetY, showWindow.getWidth() , showWindow.getHeight() , null);
 		g.dispose();
 		changeImage(resizedImage);
 		return resizedImage;
+	}
+	void mouseClicked(int windowX, int windowY) {
+		int imageX, imageY;
+		imageX = (windowX-imageOffsetX)*currentImg.getWidth()/showWindow.getWidth();
+		imageY = (windowY-imageOffsetY)*currentImg.getHeight()/showWindow.getHeight();
+		int chosenArea = ImageProcessor.selectArea(imageX, imageY);
+		System.out.println(chosenArea);
 	}
 	public static void main(String[] args) {
 		Main asdf = new Main();

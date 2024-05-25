@@ -31,6 +31,11 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 		}
 	}
 	
+	int selectArea(int imageX, int imageY) {
+		int selectedIdx = dividerObj.selectArea(imageX, imageY);
+		return selectedIdx;
+	}
+	
 	static BufferedImage makeImageFromPix(short[][][] pixelVal,int width, int height) {
 		BufferedImage resultImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		WritableRaster raster = resultImage.getRaster();
