@@ -162,6 +162,13 @@ public class Main extends JFrame{
 			}
 		});
 		JButton clearButton = new JButton("Clear");
+		clearButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				imageProcessorObj.clearSelection();
+				currentImg = imageProcessorObj.getUpdatedImage();
+				redrawImage();
+			}
+		});
 		lowerPanel.add(mergeButton); lowerPanel.add(clearButton);
 		showWindow.add(lowerPanel, BorderLayout.SOUTH);
 		showWindow.setSize(new Dimension(1000,800));

@@ -75,6 +75,10 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 		dividerObj.mergeSelectedAreas();
 	}
 	
+	public void clearSelection() {
+		dividerObj.clearSelection();
+	}
+	
 	BufferedImage drawAreaEdges(short[][][] pixelVal, int distThresh) {
 		short[][][] edgePixVal = new short[width][height][3];
 		

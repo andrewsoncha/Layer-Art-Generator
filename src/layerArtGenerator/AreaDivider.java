@@ -151,4 +151,8 @@ public class AreaDivider {
 		
 		selectedAreaIndex = new HashSet<Integer>();
 	}
+	
+	void clearSelection() {
+		selectedAreaIndex = new HashSet<Integer>();
+	}
 }
