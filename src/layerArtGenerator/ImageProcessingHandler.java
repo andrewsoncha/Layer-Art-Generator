@@ -71,6 +71,10 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 		return drawAreaEdges(origPixelVal, 1);
 	}
 	
+	public void merge() {
+		dividerObj.mergeSelectedAreas();
+	}
+	
 	BufferedImage drawAreaEdges(short[][][] pixelVal, int distThresh) {
 		short[][][] edgePixVal = new short[width][height][3];
 		
@@ -94,6 +98,7 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 		
 		Set<Integer> selectedAreaIdx = dividerObj.selectedAreaIndex;   //highlight the edges of selected areas as white
 		for(int i: selectedAreaIdx) {
+			System.out.printf("i:%d\n", i);
 			Set<Pair> edge = dividerObj.areaMap.get(i).getEdges(distThresh);
 			//System.out.printf("i:%d   edge size:%d\n", i,edge.size());
 			

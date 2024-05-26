@@ -1,6 +1,8 @@
 
 package layerArtGenerator;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -152,6 +154,13 @@ public class Main extends JFrame{
 		
 		JPanel lowerPanel = new JPanel();
 		JButton mergeButton = new JButton("Merge");
+		mergeButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				imageProcessorObj.merge();
+				currentImg = imageProcessorObj.getUpdatedImage();
+				redrawImage();
+			}
+		});
 		JButton clearButton = new JButton("Clear");
 		lowerPanel.add(mergeButton); lowerPanel.add(clearButton);
 		showWindow.add(lowerPanel, BorderLayout.SOUTH);

@@ -132,19 +132,23 @@ public class AreaDivider {
 		int maxCnt=0;
 		Area biggestArea = null;
 		int biggestAreaIdx=-1;
-		for(Integer areaIdx : selectedAreaIndex) {
-			if(maxCnt<areaMap.get(areaIdx).pixCoor.size()) {
-				maxCnt = areaMap.get(areaIdx).pixCoor.size();
-				biggestArea = areaMap.get(areaIdx);
-				biggestAreaIdx = areaIdx;
+		for(Integer selectedIdx : selectedAreaIndex) {
+			if(maxCnt<areaMap.get(selectedIdx).pixCoor.size()) {
+				maxCnt = areaMap.get(selectedIdx).pixCoor.size();
+				biggestArea = areaMap.get(selectedIdx);
+				biggestAreaIdx = selectedIdx;
 			}
 		}
-		for(Integer areaIdx : selectedAreaIndex) {
-			if(biggestAreaIdx!=areaIdx) {
-				biggestArea.merge(areaMap.get(areaIdx));
-				areaMap.remove(areaIdx);
+		for(Integer selectedIdx : selectedAreaIndex) {
+			if(biggestAreaIdx!=selectedIdx) {
+				biggestArea.merge(areaMap.get(selectedIdx));
+				for(Pair replacedCoor : areaMap.get(selectedIdx).pixCoor) {
+					areaIdx[replacedCoor.x][replacedCoor.y]=biggestAreaIdx;
+				}
+				areaMap.remove(selectedIdx);
 			}
 		}
+		
 		selectedAreaIndex = new HashSet<Integer>();
 	}
 }
