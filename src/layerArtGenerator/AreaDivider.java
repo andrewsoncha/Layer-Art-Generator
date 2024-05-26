@@ -97,9 +97,6 @@ public class AreaDivider {
 							visit[neighbor.x][neighbor.y]=true;
 							resultArea.addCoor(neighbor.x, neighbor.y);
 						}
-						else {
-							System.out.println("NOT!!!!!!!!!!!!!!!!!!!!!!!!!!");
-						}
 					}
 				}
 			}

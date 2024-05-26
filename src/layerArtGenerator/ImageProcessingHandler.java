@@ -35,7 +35,7 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 		if(imageX<0||imageY<0) {
 			return -1;
 		}
-		if(imageX>width||imageY>height) {
+		if(imageX>=width||imageY>=height) {
 			return -1;
 		}
 		int selectedIdx = dividerObj.selectArea(imageX, imageY);

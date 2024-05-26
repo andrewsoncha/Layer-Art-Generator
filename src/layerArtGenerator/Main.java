@@ -113,7 +113,7 @@ public class Main extends JFrame{
 	ImageProcessingHandler imageProcessorObj;
 	WindowMouseListener mouseListener;
 	int imageOffsetX=0, imageOffsetY=0;
-	int mouseX, mouseY;
+	int currentWidth, currentHeight;
 	public Main() {
 		this.setTitle("FileDialogTest");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -172,6 +172,7 @@ public class Main extends JFrame{
 		lowerPanel.add(mergeButton); lowerPanel.add(clearButton);
 		showWindow.add(lowerPanel, BorderLayout.SOUTH);
 		showWindow.setSize(new Dimension(1000,800));
+		
 		JLabel picLabel = new JLabel(new ImageIcon(redrawImage()));
 		showPanel.add(picLabel);
 		showWindow.setVisible(true);
@@ -183,21 +184,28 @@ public class Main extends JFrame{
 		showPanel.updateUI();
 	}
 	BufferedImage redrawImage() {
-		int newImageWidth = (int)(currentImg.getWidth() * zoomLevel);
-		int newImageHeight = (int)(currentImg.getHeight() * zoomLevel);
-		BufferedImage resizedImage = new BufferedImage(showWindow.getWidth() , showWindow.getHeight(), currentImg.getType());
+		currentWidth = (int)(currentImg.getWidth() * zoomLevel);
+		currentHeight = (int)(currentImg.getHeight() * zoomLevel);
+		BufferedImage resizedImage=null;
+		if(showPanel.getWidth()>0&&showPanel.getHeight()>0) {
+			resizedImage = new BufferedImage(showPanel.getWidth() , showPanel.getHeight(), currentImg.getType());
+		}
+		else {
+			resizedImage = new BufferedImage(showWindow.getWidth() , showWindow.getHeight(), currentImg.getType());
+		}
 		Graphics2D g = resizedImage.createGraphics();
 		System.out.printf("imageOffsetX:%d   imageOffsetY:%d\n", imageOffsetX,imageOffsetY);
 		//g.drawImage(currentImg, imageOffsetX, imageOffsetY, newImageWidth , newImageHeight , null);
-		g.drawImage(currentImg, imageOffsetX, imageOffsetY, newImageWidth, newImageHeight , null);
+		g.drawImage(currentImg, imageOffsetX, imageOffsetY, currentWidth, currentHeight , null);
 		g.dispose();
 		changeImage(resizedImage);
 		return resizedImage;
 	}
 	void mouseClicked(int windowX, int windowY) {
 		int imageX, imageY;
-		imageX = (windowX-imageOffsetX)*currentImg.getWidth()/showWindow.getWidth();
-		imageY = (windowY-imageOffsetY)*currentImg.getHeight()/showWindow.getHeight();
+		System.out.printf("x:%f    y:%f\n",(double)(windowX-imageOffsetX)/currentImg.getWidth(),(double)(windowY-imageOffsetY)/currentImg.getHeight());
+		imageX = (windowX-imageOffsetX)*origImg.getWidth()/currentWidth;
+		imageY = (windowY-imageOffsetY)*origImg.getHeight()/currentHeight;
 		int chosenArea = imageProcessorObj.selectArea(imageX, imageY);
 		System.out.println(chosenArea);
 		currentImg = imageProcessorObj.getUpdatedImage();
