@@ -152,14 +152,14 @@ public class Main extends JFrame{
 	}
 	void showImage(BufferedImage pic) {
 		showPanel = new JPanel();
+		mouseListener = new WindowMouseListener(this);
+		showPanel.addMouseListener(mouseListener);
+		showPanel.addMouseMotionListener(mouseListener);
+		showPanel.addMouseWheelListener(mouseListener);
 		
 		//showPanel.setSize(new Dimension(pic.getWidth(), pic.getHeight()));
 		showWindow = new JFrame();
 		showWindow.setLayout(new BorderLayout());
-		mouseListener = new WindowMouseListener(this);
-		showWindow.addMouseListener(mouseListener);
-		showWindow.addMouseMotionListener(mouseListener);
-		showWindow.addMouseWheelListener(mouseListener);
 		showWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		areaCntLabel = new JLabel("Count: "+imageProcessorObj.getAreaN());
@@ -170,12 +170,12 @@ public class Main extends JFrame{
 		JPanel lowerPanel = new JPanel();
 		lowerPanel.setLayout(new BorderLayout());
 		
-		JPanel spinPanel = new JPanel();
+		/*JPanel spinPanel = new JPanel();
 		spinPanel.setLayout(new FlowLayout());
 		hueNSpinner = new JSpinner(new SpinnerNumberModel(40, 1, 360, 1));
 		satNSpinner = new JSpinner(new SpinnerNumberModel(20, 1, 100, 1));
 		valNSpinner = new JSpinner(new SpinnerNumberModel(20, 1, 100, 1));
-		spinPanel.add(hueNSpinner);spinPanel.add(satNSpinner);spinPanel.add(valNSpinner);
+		spinPanel.add(hueNSpinner);spinPanel.add(satNSpinner);spinPanel.add(valNSpinner);*/
 		
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout());

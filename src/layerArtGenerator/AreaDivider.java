@@ -55,7 +55,7 @@ class Area{
 		neighbors.remove(toRemove);
 	}
 	boolean isEdge(Pair coor, int distThresh) { //pixels that are less further than distThresh from a different area pixel or the edge of the image is the edge of the area.
-												//ex: if coor[a][b] and coor[a-2][b+2] are different areas and the distThresh is 3, coor[a][b] is an edge pixel.
+												//ex: if coor[a][b] and coor[a-3][b+3] are different areas and the distThresh is 3, coor[a][b] is an edge pixel.
 		int x = coor.x, y=coor.y;
 		if(!pixCoor.contains(coor)) {
 			return false;
@@ -63,8 +63,11 @@ class Area{
 		for(int i=-distThresh;i<=distThresh;i++) {
 			for(int j=-distThresh;j<=distThresh;j++) {
 				Pair neighbor = new Pair(x+i,y+j);
-				if(!pixCoor.contains(neighbor)) {
-					return true;
+				if(neighbor.x>0&&neighbor.x<dividerObj.width&&neighbor.y>0&&neighbor.y<dividerObj.height) { //I really don't like accessing dividerObj to do things within Area class but
+																											//but this is the only way I can get rid of the bug where edge border after merging areas remain
+					if(dividerObj.areaIdx[neighbor.x][neighbor.y]!=idxCode) {
+						return true;
+					}
 				}
 			}
 		}
