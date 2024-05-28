@@ -55,9 +55,9 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 		return resultImage;
 	}
 	
-	public BufferedImage getSegmentedImage() {
+	public BufferedImage getSegmentedImage(int HueN, int SatN, int ValN) {
 		int[][][] hsvVal = getHSVImgFromRGB(origPixelVal);
-		HSVPeakFinder climberObj = new HSVPeakFinder(hsvVal, width, height, 20, 10, 10);
+		HSVPeakFinder climberObj = new HSVPeakFinder(hsvVal, width, height, HueN, SatN, ValN);
 		int[][][] segmentedHSVVal = climberObj.getSegmentedImage();
 		segmentedImg = getRGBImgFromHSV(segmentedHSVVal);
 		
@@ -71,12 +71,41 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 		return drawAreaEdges(origPixelVal, 1);
 	}
 	
-	public void merge() {
+	public void mergeSelected() {
 		dividerObj.mergeSelectedAreas();
 	}
 	
 	public void clearSelection() {
 		dividerObj.clearSelection();
+	}
+	
+	public void mergeSmallerAreas(int sizeThresh) {
+		dividerObj.mergeSmallerAreas(sizeThresh);
+	}
+	
+	public ArrayList<BufferedImage> getEveryAreaImage(){
+		ArrayList<BufferedImage> result = new ArrayList<BufferedImage>();
+		for(Area aI:dividerObj.areaMap.values()) {
+			result.add(getAreaImage(aI));
+		}
+		return result;
+	}
+	
+	BufferedImage getAreaImage(Area area) {
+		short[][][] areaImg = new short[width][height][3];
+		for(int i=0;i<width;i++) {
+			for(int j=0;j<height;j++) {
+				for(int k=0;k<3;k++) {
+					areaImg[i][j][k]=255;
+				}
+			}
+		}
+		
+		for(Pair pI: area.getPixCoor()) {
+			areaImg[pI.x][pI.y][0]=0;areaImg[pI.x][pI.y][1]=0;areaImg[pI.x][pI.y][2]=0;
+		}
+		
+		return makeImageFromPix(areaImg, width, height);
 	}
 	
 	BufferedImage drawAreaEdges(short[][][] pixelVal, int distThresh) {
@@ -100,10 +129,10 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 			}
 		}
 		
-		Set<Integer> selectedAreaIdx = dividerObj.selectedAreaIndex;   //highlight the edges of selected areas as white
-		for(int i: selectedAreaIdx) {
-			System.out.printf("i:%d\n", i);
-			Set<Pair> edge = dividerObj.areaMap.get(i).getEdges(distThresh);
+		Set<Area> selectedAreas = dividerObj.selectedAreas;   //highlight the edges of selected areas as white
+		for(Area areaI: selectedAreas) {
+			System.out.printf("i:%d\n", areaI.getIdx());
+			Set<Pair> edge = areaI.getEdges(distThresh);
 			//System.out.printf("i:%d   edge size:%d\n", i,edge.size());
 			
 			Iterator<Pair> it = edge.iterator();
@@ -135,5 +164,8 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 			}
 		}
 		return rgbVal;
+	}
+	public int getAreaN() {
+		return dividerObj.areaMap.size();
 	}
 }

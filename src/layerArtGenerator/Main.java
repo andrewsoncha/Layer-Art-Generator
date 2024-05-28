@@ -27,12 +27,10 @@ class WindowMouseListener implements MouseWheelListener, MouseListener, MouseMot
 	
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-		double notches = e.getWheelRotation()*0.1;
-		if(notches<0) { //scroll up == zoom out
+		int notches = e.getWheelRotation();
+		if(notches<=0) { //scroll up == zoom out
 			System.out.println("Mouse weel moved Up by "+(-notches)+" notch(es)");
-			if(mainObj.zoomLevel+notches>0) {
-				mainObj.zoomLevel*=1.1;
-			}
+			mainObj.zoomLevel*=1.1;
 		}
 		else { //scroll down == zoom in
 			System.out.println("Mouse weel moved Down by "+(notches)+" notch(es)");
@@ -110,10 +108,12 @@ public class Main extends JFrame{
 	BufferedImage currentImg;
 	JFrame showWindow;
 	JPanel showPanel;
+	JLabel areaCntLabel;
 	ImageProcessingHandler imageProcessorObj;
 	WindowMouseListener mouseListener;
 	int imageOffsetX=0, imageOffsetY=0;
 	int currentWidth, currentHeight;
+	JSpinner hueNSpinner, satNSpinner, valNSpinner;
 	public Main() {
 		this.setTitle("FileDialogTest");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -129,7 +129,18 @@ public class Main extends JFrame{
 			try {
 				origImg = ImageIO.read(new File(filename));
 				imageProcessorObj = new ImageProcessingHandler(origImg);
-				segmentedImg = imageProcessorObj.getSegmentedImage();
+				int HueN, SatN, ValN;
+				if(hueNSpinner!=null&&satNSpinner!=null&&valNSpinner!=null) {
+					HueN = (int)hueNSpinner.getValue();
+					SatN = (int)satNSpinner.getValue();
+					ValN = (int)valNSpinner.getValue();
+				}
+				else {
+					HueN = 40;
+					SatN = 10;
+					ValN = 10;
+				}
+				segmentedImg = imageProcessorObj.getSegmentedImage(HueN, SatN, ValN);
 				currentImg = segmentedImg;
 				showImage(segmentedImg);
 			} catch (IOException e) {
@@ -150,14 +161,39 @@ public class Main extends JFrame{
 		showWindow.addMouseMotionListener(mouseListener);
 		showWindow.addMouseWheelListener(mouseListener);
 		showWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		areaCntLabel = new JLabel("Count: "+imageProcessorObj.getAreaN());
+		showWindow.add(areaCntLabel, BorderLayout.NORTH);
+		
 		showWindow.add(showPanel, BorderLayout.CENTER);
 		
 		JPanel lowerPanel = new JPanel();
-		JButton mergeButton = new JButton("Merge");
-		mergeButton.addActionListener(new ActionListener() {
+		lowerPanel.setLayout(new BorderLayout());
+		
+		JPanel spinPanel = new JPanel();
+		spinPanel.setLayout(new FlowLayout());
+		hueNSpinner = new JSpinner(new SpinnerNumberModel(40, 1, 360, 1));
+		satNSpinner = new JSpinner(new SpinnerNumberModel(20, 1, 100, 1));
+		valNSpinner = new JSpinner(new SpinnerNumberModel(20, 1, 100, 1));
+		spinPanel.add(hueNSpinner);spinPanel.add(satNSpinner);spinPanel.add(valNSpinner);
+		
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new FlowLayout());
+		JButton mergeSmallerButton = new JButton("Merge Smaller Areas");
+		mergeSmallerButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				imageProcessorObj.merge();
+				imageProcessorObj.mergeSmallerAreas(40);
 				currentImg = imageProcessorObj.getUpdatedImage();
+				areaCntLabel.setText("Count: "+imageProcessorObj.getAreaN());
+				redrawImage();
+			}
+		});
+		JButton mergeSelectedButton = new JButton("Merge Selected Areas");
+		mergeSelectedButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				imageProcessorObj.mergeSelected();
+				currentImg = imageProcessorObj.getUpdatedImage();
+				areaCntLabel.setText("Count: "+imageProcessorObj.getAreaN());
 				redrawImage();
 			}
 		});
@@ -169,7 +205,8 @@ public class Main extends JFrame{
 				redrawImage();
 			}
 		});
-		lowerPanel.add(mergeButton); lowerPanel.add(clearButton);
+		buttonPanel.add(mergeSmallerButton); buttonPanel.add(mergeSelectedButton); buttonPanel.add(clearButton);
+		lowerPanel.add(buttonPanel, BorderLayout.SOUTH);
 		showWindow.add(lowerPanel, BorderLayout.SOUTH);
 		showWindow.setSize(new Dimension(1000,800));
 		
