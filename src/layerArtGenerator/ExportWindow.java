@@ -2,6 +2,8 @@ package layerArtGenerator;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -22,11 +24,20 @@ public class ExportWindow extends ImageShowWindow{
 		showPanel.addMouseMotionListener(mouseListener);
 		showPanel.addMouseWheelListener(mouseListener);
 		
-		currentImg = imageProcessorObj.getUpdatedImage();
+		currentImg = imageProcessorObj.getBiggestAreaImage();
 		setSize(new Dimension(1000,800));
+		
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				mainObj.exportClose();
+			}
+		});
 		
 		JLabel picLabel = new JLabel(new ImageIcon(redrawImage()));
 		showPanel.add(picLabel);
+		add(showPanel);
 		setVisible(true);
 	}
 }

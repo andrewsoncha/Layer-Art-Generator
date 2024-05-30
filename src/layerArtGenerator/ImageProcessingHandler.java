@@ -3,6 +3,7 @@ package layerArtGenerator;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.Iterator;
 public class ImageProcessingHandler { //the functions could probably be divided better
@@ -86,12 +87,26 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 	public ArrayList<BufferedImage> getEveryAreaImage(){
 		ArrayList<BufferedImage> result = new ArrayList<BufferedImage>();
 		for(Area aI:dividerObj.areaMap.values()) {
-			result.add(getAreaImage(aI));
+			HashSet<Area> oneAreaSet = new HashSet<Area>();oneAreaSet.add(aI);
+			result.add(getAreaImage(oneAreaSet));
 		}
 		return result;
 	}
 	
-	BufferedImage getAreaImage(Area area) {
+	public BufferedImage getBiggestAreaImage() {
+		Area biggestArea = dividerObj.getBiggestArea(dividerObj.areaMap.values());
+		Set<Area> biggestAreaSet = new HashSet<Area>(); biggestAreaSet.add(biggestArea);
+		return getAreaImage(biggestAreaSet);
+	}
+	
+	void drawAreaImage(Area area, short[][][] canvas) {
+		
+		for(Pair pI: area.getPixCoor()) {
+			canvas[pI.x][pI.y][0]=0;canvas[pI.x][pI.y][1]=0;canvas[pI.x][pI.y][2]=0;
+		}
+	}
+	
+	BufferedImage getAreaImage(Set<Area> area) {
 		short[][][] areaImg = new short[width][height][3];
 		for(int i=0;i<width;i++) {
 			for(int j=0;j<height;j++) {
@@ -100,9 +115,8 @@ public class ImageProcessingHandler { //the functions could probably be divided 
 				}
 			}
 		}
-		
-		for(Pair pI: area.getPixCoor()) {
-			areaImg[pI.x][pI.y][0]=0;areaImg[pI.x][pI.y][1]=0;areaImg[pI.x][pI.y][2]=0;
+		for(Area aI: area) {
+			drawAreaImage(aI, areaImg);
 		}
 		
 		return makeImageFromPix(areaImg, width, height);

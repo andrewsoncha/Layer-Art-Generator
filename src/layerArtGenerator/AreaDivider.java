@@ -1,6 +1,7 @@
 package layerArtGenerator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
@@ -203,7 +204,7 @@ public class AreaDivider {
 		return selectedIdx;
 	}
 	
-	Area getBiggestArea(Set<Area> areaSet) {
+	Area getBiggestArea(Collection<Area> areaSet) {
 		int maxCnt=0;
 		Area biggestArea = null;
 		int biggestAreaIdx=-1;
