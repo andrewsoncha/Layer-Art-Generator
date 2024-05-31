@@ -69,7 +69,7 @@ public class ExportWindow extends ImageShowWindow{
 		});
 		JPanel lowerPanel = new JPanel();
 		lowerPanel.setLayout(new FlowLayout());
-		lowerPanel.add(writeButton);
+		lowerPanel.add(clearButton);lowerPanel.add(writeButton);
 		add(lowerPanel, BorderLayout.SOUTH);
 		setVisible(true);
 	}
