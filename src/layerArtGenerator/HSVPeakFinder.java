@@ -31,6 +31,19 @@ public class HSVPeakFinder{
 		int[][][] segmentedImage = drawPeakImg();
 		return segmentedImage;
 	}
+	double dist(int[] HSV1, int[] HSV2) {
+		int h1 = HSV1[0], s1 = HSV1[1], v1 = HSV1[2];
+		int h2 = HSV2[0], s2 = HSV2[1], v2 = HSV2[2];
+		double scaledH1 = (double)h1/HueN*Math.PI*2,
+				scaledS1 = (double)s1/SatN,
+				scaledV1 = (double)v1/ValN;
+		double scaledH2 = (double)h2/HueN*Math.PI*2,
+				scaledS2 = (double)s2/SatN,
+				scaledV2 = (double)v2/ValN;
+		return Math.pow(Math.sin(scaledH1)*scaledS1*scaledV1-Math.sin(scaledH2)*scaledS2*scaledV2,2)+
+				Math.pow(Math.cos(scaledH1)*scaledS1*scaledV1-Math.cos(scaledH2)*scaledS2*scaledV2, 2)+
+				Math.pow(scaledV1-scaledV2, 2);
+	}
 	void makeHist() {
 		for(int i=0;i<width;i++) {
 			for(int j=0;j<height;j++) {
@@ -110,13 +123,14 @@ public class HSVPeakFinder{
 			for(int sI=0;sI<SatN;sI++) {
 				for(int vI=0;vI<ValN;vI++) {
 					int closestPeak=-1;
-					int minDist=Integer.MAX_VALUE;
+					double minDist=Double.MAX_VALUE;
 					for(int peakI=0;peakI<peakN;peakI++) {
 						int peakH,peakS,peakV;
 						int[] peakArr = peaks.get(peakI);
 						peakH = peakArr[0]; peakS = peakArr[1]; peakV = peakArr[2];
 						
-						int dist = (peakH-hI)*(peakH-hI)/HueN+(peakS-sI)*(peakS-sI)/SatN+(peakV-vI)*(peakV-vI)/ValN;
+						int[] currArr = {hI,sI,vI};
+						double dist = dist(peakArr, currArr);
 						if(dist<minDist) {
 							minDist = dist;
 							closestPeak = peakI;
