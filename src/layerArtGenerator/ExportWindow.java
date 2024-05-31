@@ -22,8 +22,11 @@ import javax.swing.JPanel;
 
 public class ExportWindow extends ImageShowWindow{
 	Main mainObj;
+	int origWidth, origHeight;
 	public ExportWindow(Main mainObj, ImageProcessingHandler imageProcessorObj) {
 		this.mainObj = mainObj;
+		origWidth = mainObj.origImg.getWidth();
+		origHeight = mainObj.origImg.getHeight();
 		this.imageProcessorObj = imageProcessorObj;
 		System.out.println("ExportWindow Constructor Called!\n");
 		setLayout(new BorderLayout());
@@ -34,7 +37,7 @@ public class ExportWindow extends ImageShowWindow{
 		showPanel.addMouseMotionListener(mouseListener);
 		showPanel.addMouseWheelListener(mouseListener);
 		
-		currentImg = imageProcessorObj.getBiggestAreaImage();
+		currentImg = imageProcessorObj.getSelectedAreaImage(false);
 		setSize(new Dimension(1000,800));
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -49,10 +52,19 @@ public class ExportWindow extends ImageShowWindow{
 		showPanel.add(picLabel);
 		add(showPanel, BorderLayout.CENTER);
 		
+		JButton clearButton = new JButton("Clear");
+		clearButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				imageProcessorObj.clearSelection();
+				currentImg = imageProcessorObj.getSelectedAreaImage(false);
+				redrawImage();
+			}
+		});
 		JButton writeButton = new JButton("Write to File");
 		writeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				writeImage(currentImg);
+				BufferedImage saveImg = imageProcessorObj.getSelectedAreaImage(true);
+				writeImage(saveImg);
 			}
 		});
 		JPanel lowerPanel = new JPanel();
@@ -75,5 +87,15 @@ public class ExportWindow extends ImageShowWindow{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	void mouseClicked(int windowX, int windowY) {
+		int imageX, imageY;
+		System.out.printf("x:%f    y:%f\n",(double)(windowX-imageOffsetX)/currentImg.getWidth(),(double)(windowY-imageOffsetY)/currentImg.getHeight());
+		imageX = (windowX-imageOffsetX)*origWidth/currentWidth;
+		imageY = (windowY-imageOffsetY)*origHeight/currentHeight;
+		int chosenArea = imageProcessorObj.selectArea(imageX, imageY);
+		System.out.println(chosenArea);
+		currentImg = imageProcessorObj.getSelectedAreaImage(false);
+		redrawImage();
 	}
 }

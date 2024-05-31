@@ -99,7 +99,7 @@ class WindowMouseListener implements MouseWheelListener, MouseListener, MouseMot
 	
 }
 
-public class ImageShowWindow extends JFrame{
+public abstract class ImageShowWindow extends JFrame{
 	double zoomLevel =1.0;
 	BufferedImage currentImg;
 	JPanel showPanel;
@@ -131,6 +131,5 @@ public class ImageShowWindow extends JFrame{
 		changeImage(resizedImage);
 		return resizedImage;
 	}
-	void mouseClicked(int mouseX, int mouseY) {
-	}
+	abstract void mouseClicked(int windowX, int windowY);
 }

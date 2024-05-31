@@ -104,7 +104,7 @@ public class Main extends ImageShowWindow{
 		JButton clearButton = new JButton("Clear");
 		clearButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(exportOpen) {
+				if(!exportOpen) {
 					imageProcessorObj.clearSelection();
 					currentImg = imageProcessorObj.getUpdatedImage();
 					redrawImage();
