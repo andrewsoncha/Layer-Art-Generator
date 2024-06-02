@@ -14,10 +14,12 @@ import javax.swing.*;
 public class Main extends ImageShowWindow{
 	BufferedImage origImg;
 	BufferedImage segmentedImg;
-	JLabel areaCntLabel;
+	JPanel parameterPanel;
 	JSpinner hueNSpinner, satNSpinner, valNSpinner;
+	JSpinner sizeThresholdSpinner;
 	boolean exportOpen; //flag indicating whether there is an export window open. If so, don't carry out click functions or button press.
 	Main mainObj;
+	JLabel picLabel;
 	public Main() {
 		mainObj = this;
 		FileDialog fd = new FileDialog(this, "Choose a file", FileDialog.LOAD);
@@ -32,26 +34,21 @@ public class Main extends ImageShowWindow{
 				origImg = ImageIO.read(new File(filename));
 				imageProcessorObj = new ImageProcessingHandler(origImg);
 				int HueN, SatN, ValN;
-				if(hueNSpinner!=null&&satNSpinner!=null&&valNSpinner!=null) {
-					HueN = (int)hueNSpinner.getValue();
-					SatN = (int)satNSpinner.getValue();
-					ValN = (int)valNSpinner.getValue();
-				}
-				else {
-					HueN = 40;
-					SatN = 10;
-					ValN = 10;
-				}
+				SpinnerModel hueModel, satModel, valModel;
+				hueNSpinner = new JSpinner(new SpinnerNumberModel(40, 1, 360, 1)); satNSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1)); valNSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
+				HueN = 40;
+				SatN = 10;
+				ValN = 10;
 				segmentedImg = imageProcessorObj.getSegmentedImage(HueN, SatN, ValN);
 				currentImg = segmentedImg;
-				showImage(segmentedImg);
+				setUpWindow();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
-	void showImage(BufferedImage pic) {
+	void setUpWindow() {
 		showPanel = new JPanel();
 		mouseListener = new WindowMouseListener(this);
 		showPanel.addMouseListener(mouseListener);
@@ -62,8 +59,26 @@ public class Main extends ImageShowWindow{
 		setLayout(new BorderLayout());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		areaCntLabel = new JLabel("Count: "+imageProcessorObj.getAreaN());
-		add(areaCntLabel, BorderLayout.NORTH);
+		JButton redivButton = new JButton("Redivide Image");
+		redivButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(!exportOpen) {
+					int HueN, SatN, ValN;
+					HueN = (int)hueNSpinner.getValue(); SatN = (int)satNSpinner.getValue(); ValN = (int)valNSpinner.getValue();
+					System.out.printf("Redivide Image %d %d %d\n",HueN, SatN, ValN);
+					segmentedImg = imageProcessorObj.getSegmentedImage(HueN, SatN, ValN);
+					currentImg = segmentedImg;
+					showImage(redrawImage());
+				}
+			}
+		});
+		parameterPanel = new JPanel();
+		parameterPanel.setLayout(new FlowLayout());
+		parameterPanel.add(new JLabel("Hue Bucket N:"));parameterPanel.add(hueNSpinner);
+		parameterPanel.add(new JLabel("Sat Bucket N:")); parameterPanel.add(satNSpinner);
+		parameterPanel.add(new JLabel("Val Bucket N:")); parameterPanel.add(valNSpinner);
+		parameterPanel.add(redivButton);
+		add(parameterPanel, BorderLayout.NORTH);
 		
 		add(showPanel, BorderLayout.CENTER);
 		
@@ -80,12 +95,13 @@ public class Main extends ImageShowWindow{
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout());
 		JButton mergeSmallerButton = new JButton("Merge Smaller Areas");
+		sizeThresholdSpinner = new JSpinner(new SpinnerNumberModel(40, 1, Integer.MAX_VALUE, 1));
 		mergeSmallerButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(!exportOpen) {
-					imageProcessorObj.mergeSmallerAreas(40);
+					int sizeThreshold = (int)sizeThresholdSpinner.getValue();
+					imageProcessorObj.mergeSmallerAreas(sizeThreshold);
 					currentImg = imageProcessorObj.getUpdatedImage();
-					areaCntLabel.setText("Count: "+imageProcessorObj.getAreaN());
 					redrawImage();
 				}
 			}
@@ -96,12 +112,11 @@ public class Main extends ImageShowWindow{
 				if(!exportOpen) {
 					imageProcessorObj.mergeSelected();
 					currentImg = imageProcessorObj.getUpdatedImage();
-					areaCntLabel.setText("Count: "+imageProcessorObj.getAreaN());
 					redrawImage();
 				}
 			}
 		});
-		JButton clearButton = new JButton("Clear");
+		JButton clearButton = new JButton("Clear Selection");
 		clearButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(!exportOpen) {
@@ -120,13 +135,19 @@ public class Main extends ImageShowWindow{
 				}
 			}
 		});
+		
+		buttonPanel.add(new JLabel("Area Size Threshold:")); buttonPanel.add(sizeThresholdSpinner);
 		buttonPanel.add(mergeSmallerButton); buttonPanel.add(mergeSelectedButton); buttonPanel.add(clearButton); buttonPanel.add(exportButton);
 		lowerPanel.add(buttonPanel, BorderLayout.SOUTH);
 		add(lowerPanel, BorderLayout.SOUTH);
 		setSize(new Dimension(1000,800));
 		
-		JLabel picLabel = new JLabel(new ImageIcon(redrawImage()));
+		picLabel = new JLabel(new ImageIcon(redrawImage()));
 		showPanel.add(picLabel);
+		showImage(redrawImage());
+	}
+	void showImage(BufferedImage pic) {
+		picLabel.setIcon(new ImageIcon(pic));
 		setVisible(true);
 	}
 	void exportClose() {

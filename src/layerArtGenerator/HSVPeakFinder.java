@@ -53,9 +53,9 @@ public class HSVPeakFinder{
 				V = ImgHSVVal[i][j][2];
 				
 				int HBucket, SBucket, VBucket;
-				HBucket = (H-1)/(360/HueN);
-				SBucket = (S-1)/(100/SatN);
-				VBucket = (V-1)/(100/ValN);
+				HBucket = (H-1)/(360/HueN); HBucket = (HBucket<=HueN-1)?HBucket:(HueN-1);
+				SBucket = (S-1)/(100/SatN); SBucket = (SBucket<=SatN-1)?SBucket:(SatN-1);
+				VBucket = (V-1)/(100/ValN); VBucket = (VBucket<=ValN-1)?VBucket:(ValN-1);
 				
 				hist[HBucket][SBucket][VBucket]++;
 			}
@@ -149,9 +149,9 @@ public class HSVPeakFinder{
 				int origH,origS,origV;
 				origH=origHSV[0];origS=origHSV[1];origV=origHSV[2];
 				int HBucket, SBucket, VBucket;
-				HBucket = (origH-1)/(360/HueN);
-				SBucket = (origS-1)/(100/SatN);
-				VBucket = (origV-1)/(100/ValN);
+				HBucket = (origH-1)/(360/HueN);HBucket = (HBucket<=HueN-1)?HBucket:(HueN-1);
+				SBucket = (origS-1)/(100/SatN);SBucket = (SBucket<=SatN-1)?SBucket:(SatN-1);
+				VBucket = (origV-1)/(100/ValN);VBucket = (VBucket<=ValN-1)?VBucket:(ValN-1);
 				int peakI=-1;
 				peakI = assignedPeak[HBucket][SBucket][VBucket];
 				int peakH,peakS,peakV;
